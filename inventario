@@ -1,0 +1,166 @@
+
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+struct Producto {
+    int id;
+    string nombre;
+    float precio;
+    int cantidad;
+};
+
+void agregar () {
+    Producto p;
+    ifstream leer ("inventario.txt");
+    bool existe = false;
+
+    cout << "Id: ";
+    cin >> p.id;
+
+    Producto P;
+    while (leer >> P.id >> P.nombre >> P.precio >> P.cantidad) {
+        if (P.id == p.id) {
+            existe = true;
+            break;
+        }
+    }
+    leer.close();
+
+    if (existe) {
+        cout << "El id ya fue ingresado\n";
+        return;
+    }
+
+    cout << "Nombre: ";
+    cin >> p.nombre;
+    cout << "Precio: ";
+    cin >> p.precio;
+    cout << "Cantidad: ";
+    cin >> p.cantidad;
+
+    ofstream escribir ("inventario.txt", ios::app);
+    escribir << p.id << " " << p.nombre << " " << p.precio << " " << p.cantidad << endl;
+    escribir.close();
+
+    cout << "El producto a sido guardado en el sistema.\n";
+
+}
+
+void listar() {
+    ifstream leer("inventario.txt");
+    Producto p;
+
+    cout << "\n --- Lista de productos --- \n";
+
+    while (leer >> p.id >> p.nombre >> p.precio >> p.cantidad) {
+        cout << p.id << " / "
+             << p.nombre << " / "
+             << p.precio << " / "
+             << p.cantidad << endl;
+    }
+
+    leer.close();
+}
+
+void buscar() {
+    int buscarId;
+    cout << "Ingrese la Id del producto: ";
+    cin >> buscarId;
+
+    ifstream leer("inventario.txt");
+    Producto p;
+    bool encontrado = false;
+
+    while (leer >> p.id >> p.nombre >> p.precio >> p.cantidad) {
+        if (p.id == buscarId) {
+            cout << "El producto fue encontrado:\n";
+            cout << p.id << " - "
+                 << p.nombre << " - "
+                 << p.precio << " - "
+                 << p.cantidad << endl;
+            encontrado = true;
+            break;
+        }
+    }
+
+    if (!encontrado)
+        cout << "El producto no pudo ser encontrado.\n";
+
+    leer.close();
+}
+
+void totalInventario() {
+    ifstream leer ("inventario.txt");
+    Producto p;
+    float total = 0;
+
+    while (leer >> p.id >> p.nombre >> p.precio >> p.cantidad) {
+        total += p.precio * p.cantidad;
+    }
+
+    cout << "Total inventario: " << total << endl;
+    leer.close();
+}
+
+void actualizarCantidad() {
+    int buscarId;
+    cout << "Ingrese la Id que va a actualizar: ";
+    cin >> buscarId;
+
+    ifstream leer ("inventario.txt");
+    ofstream temp ("temp.txt");
+
+    Producto p;
+    bool encontrado = false;
+
+    while (leer >> p.id >> p.nombre >> p.precio >> p.cantidad) {
+        if (p.id == buscarId) {
+            cout << "Ingresar la nueva cantidad: ";
+            cin >> p.cantidad;
+            encontrado = true;
+        }
+
+        temp << p.id << " "
+             << p.nombre << " "
+             << p.precio << " "
+             << p.cantidad << endl;
+    }
+
+    leer.close();
+    temp.close();
+
+    remove("inventario.txt");
+    rename("temp.txt", "inventario.txt");
+
+    if (encontrado)
+        cout << "La cantidad fue actualizada.\n";
+    else
+        cout << "El producto no pudo ser encontrado.\n";
+}
+
+int main() {
+    int op;
+
+    do {
+        cout << "\n --- Opciones --- \n";
+        cout << "1. Agregar productos.\n";
+        cout << "2. Listar productos.\n";
+        cout << "3. Buscar producto.\n";
+        cout << "4. Total inventario.\n";
+        cout << "5. Actualizar cantidad.\n";
+        cout << "0. Salir.\n";
+        cout << "Opcion: ";
+        cin >> op;
+
+        if (op == 1) agregar();
+        if (op == 2) listar();
+        if (op == 3) buscar();
+        if (op == 4) totalInventario();
+        if (op == 5) actualizarCantidad();
+
+    } while (op != 0);
+
+    return 0;
+}
