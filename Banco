@@ -1,0 +1,234 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Cuenta {
+private:
+    string titular;
+    int numeroCuenta;
+    float saldo;
+    vector<string> historial;
+
+public:
+    // Constructor
+    Cuenta(string t, int n, float s) {
+        titular = t;
+        numeroCuenta = n;
+        saldo = s;
+        historial.push_back("Cuenta creada con saldo inicial: " + to_string(s));
+    }
+
+    // Getters
+    int getNumeroCuenta() {
+        return numeroCuenta;
+    }
+
+    double getSaldo() {
+        return saldo;
+    }
+
+    string getTitular() {
+        return titular;
+    }
+
+    // Depositar dinero
+    void depositar(double monto) {
+        if (monto > 0) {
+            saldo += monto;
+            historial.push_back("Deposito: +" + to_string(monto));
+            cout << "Deposito exitoso.\n";
+        } else {
+            cout << "Monto invalido.\n";
+        }
+    }
+
+    // Retirar dinero
+    void retirar(float monto) {
+        if (monto > 0 && monto <= saldo) {
+            saldo -= monto;
+            historial.push_back("Retiro: -" + to_string(monto));
+            cout << "Retiro exitoso.\n";
+        } else {
+            cout << "Fondos insuficientes o monto invalido.\n";
+        }
+    }
+
+    // Transferir dinero
+    void transferir(Cuenta &destino, float monto) {
+        if (monto > 0 && monto <= saldo) {
+            saldo -= monto;
+            destino.saldo += monto;
+
+            historial.push_back("Transferencia enviada: -" + to_string(monto));
+            destino.historial.push_back("Transferencia recibida: +" + to_string(monto));
+
+            cout << "Transferencia realizada.\n";
+        } else {
+            cout << "Transferencia invalida.\n";
+        }
+    }
+
+    // Mostrar información
+    void mostrarInfo() {
+        cout << "\nTitular: " << titular << endl;
+        cout << "Numero de cuenta: " << numeroCuenta << endl;
+        cout << "Saldo: $" << saldo << endl;
+    }
+
+    // Mostrar historial
+    void mostrarHistorial() {
+        cout << "\nHistorial de operaciones:\n";
+        for (string h : historial) {
+            cout << "- " << h << endl;
+        }
+    }
+};
+
+int main() {
+    vector<Cuenta> cuentas;
+    int opcion;
+
+    do {
+        cout << "\n=== SIMULADOR BANCARIO ===\n";
+        cout << "1. Crear cuenta\n";
+        cout << "2. Depositar\n";
+        cout << "3. Retirar\n";
+        cout << "4. Transferir\n";
+        cout << "5. Mostrar cuenta\n";
+        cout << "6. Salir\n";
+        cout << "Seleccione opcion: ";
+        cin >> opcion;
+
+        // CREAR CUENTA
+        if (opcion == 1) {
+            string titular;
+            int numero;
+            float saldo;
+
+            cout << "Nombre del titular: ";
+            cin.ignore();
+            getline(cin, titular);
+
+            cout << "Numero de cuenta: ";
+            cin >> numero;
+
+            cout << "Saldo inicial: ";
+            cin >> saldo;
+
+            cuentas.push_back(Cuenta(titular, numero, saldo));
+            cout << "Cuenta creada exitosamente.\n";
+        }
+
+        // DEPOSITAR
+        else if (opcion == 2) {
+            int numero;
+            float monto;
+
+            cout << "Numero de cuenta: ";
+            cin >> numero;
+
+            cout << "Monto a depositar: ";
+            cin >> monto;
+
+            bool encontrada = false;
+
+            for (auto &c : cuentas) {
+                if (c.getNumeroCuenta() == numero) {
+                    c.depositar(monto);
+                    encontrada = true;
+                    break;
+                }
+            }
+
+            if (!encontrada) {
+                cout << "Cuenta no encontrada.\n";
+            }
+        }
+
+        // RETIRAR
+        else if (opcion == 3) {
+            int numero;
+            float monto;
+
+            cout << "Numero de cuenta: ";
+            cin >> numero;
+
+            cout << "Monto a retirar: ";
+            cin >> monto;
+
+            bool encontrada = false;
+
+            for (auto &c : cuentas) {
+                if (c.getNumeroCuenta() == numero) {
+                    c.retirar(monto);
+                    encontrada = true;
+                    break;
+                }
+            }
+
+            if (!encontrada) {
+                cout << "Cuenta no encontrada.\n";
+            }
+        }
+
+        // TRANSFERIR
+        else if (opcion == 4) {
+            int origen, destino;
+            float monto;
+
+            cout << "Cuenta origen: ";
+            cin >> origen;
+
+            cout << "Cuenta destino: ";
+            cin >> destino;
+
+            cout << "Monto: ";
+            cin >> monto;
+
+            Cuenta *cOrigen = nullptr;
+            Cuenta *cDestino = nullptr;
+
+            for (auto &c : cuentas) {
+                if (c.getNumeroCuenta() == origen)
+                    cOrigen = &c;
+
+                if (c.getNumeroCuenta() == destino)
+                    cDestino = &c;
+            }
+
+            if (cOrigen != nullptr && cDestino != nullptr) {
+                cOrigen->transferir(*cDestino, monto);
+            } else {
+                cout << "Cuenta no encontrada.\n";
+            }
+        }
+
+        // MOSTRAR CUENTA
+        else if (opcion == 5) {
+            int numero;
+            cout << "Número de cuenta: ";
+            cin >> numero;
+
+            bool encontrada = false;
+
+            for (auto &c : cuentas) {
+                if (c.getNumeroCuenta() == numero) {
+                    c.mostrarInfo();
+                    c.mostrarHistorial();
+                    encontrada = true;
+                    break;
+                }
+            }
+
+            if (!encontrada) {
+                cout << "Cuenta no encontrada.\n";
+            }
+        }
+
+    } while (opcion != 6);
+
+    cout << "Programa finalizado.\n";
+    return 0;
+}
